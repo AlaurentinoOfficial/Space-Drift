@@ -10,6 +10,9 @@ public class Player : MonoBehaviour {
 	[SerializeField, Range(0f,1f)]
 	public float JumpForce = 0.5f;
 
+	[SerializeField]
+	public Transform JumpCastEnd;
+
 	Rigidbody2D rb;
 	BoxCollider2D platform;
 
@@ -24,35 +27,37 @@ public class Player : MonoBehaviour {
 
 	void Move() {
 		if (Input.GetAxisRaw ("Horizontal") > 0) {
-			transform.localScale = new Vector3 (-1, 1, -1);
-
 			Vector2 to = Vector2.right * Velocity * Time.deltaTime;
-			transform.Translate (to);
+			to.x += transform.position.x;
+			to.y += transform.position.y;
+
+			rb.MovePosition (to);
+
 		} else if (Input.GetAxisRaw ("Horizontal") < 0) {
-			transform.localScale = new Vector3 (1, 1, -1);
-
-
 			Vector2 to = Vector2.left * Velocity * Time.deltaTime;
-			transform.Translate (to);
+			to.x += transform.position.x;
+			to.y += transform.position.y;
+
+			rb.MovePosition (to);
 		}
 
-		if (Input.GetButtonDown("Jump") && platform)
+		if (Input.GetButtonDown ("Jump") &&
+			Physics2D.Raycast(transform.position, JumpCastEnd.position, 100f, LayerMask.NameToLayer("Platform"))) {
+
 			rb.velocity = Vector2.up * JumpForce * 10;
+		}
 
 		if (Input.GetKeyDown ("down") && platform)
 			ChangeLayer ();
 	}
 
-	void ChangeLayer()
-	{
+	void ChangeLayer() {
 		transform.Translate (0, 0, -0.125f);
 		platform.enabled = false;
 	}
 
-	void OnCollisionEnter2D(Collision2D colider)
-	{
-		if (platform)
-		{
+	void OnCollisionEnter2D(Collision2D colider) {
+		if (platform) {
 			transform.position = new Vector3 (transform.position.x, transform.position.y, colider.transform.position.z);
 			platform.enabled = true;
 			platform = null;
