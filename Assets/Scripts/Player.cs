@@ -36,7 +36,7 @@ public class Player : MonoBehaviour {
 			transform.Translate (to);
 		}
 
-		if (Input.GetButtonDown("Jump"))
+		if (Input.GetButtonDown("Jump") && platform)
 			rb.velocity = Vector2.up * JumpForce * 10;
 
 		if (Input.GetKeyDown ("down") && platform)
