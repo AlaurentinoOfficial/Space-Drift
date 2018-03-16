@@ -6,6 +6,9 @@ using UnityEngine.SceneManagement;
 public class SceneLoader : MonoBehaviour {
 
 	public void LoadScene(string scene) {
-		SceneManager.LoadScene(scene);
+		if(scene.ToLower() == "exit")
+			Application.Quit();
+		else
+			SceneManager.LoadScene(scene);
 	}
 }
