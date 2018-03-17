@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Player : MonoBehaviour {
+	[SerializeField]
+	public Orbit PlayerCamera;
 
 	[SerializeField]
 	public float Velocity = 3f;
@@ -10,14 +13,11 @@ public class Player : MonoBehaviour {
 	[SerializeField, Range(0f,1f)]
 	public float JumpForce = 0.5f;
 
-	[SerializeField]
-	public Transform JumpCastEnd;
-
-	Rigidbody2D rb;
-	BoxCollider2D platform;
+	Rigidbody rb;
+	BoxCollider platform;
 
 	void Start () {
-		rb = GetComponent<Rigidbody2D>();
+		rb = GetComponent<Rigidbody>();
 		platform = null;
 	}
 
@@ -27,28 +27,33 @@ public class Player : MonoBehaviour {
 
 	void Move() {
 		if (Input.GetAxisRaw ("Horizontal") > 0) {
-			Vector2 to = Vector2.right * Velocity * Time.deltaTime;
+			Vector3 to = Vector3.right * Velocity * Time.deltaTime;
 			to.x += transform.position.x;
 			to.y += transform.position.y;
 
 			rb.MovePosition (to);
 
 		} else if (Input.GetAxisRaw ("Horizontal") < 0) {
-			Vector2 to = Vector2.left * Velocity * Time.deltaTime;
+			Vector3 to = Vector3.left * Velocity * Time.deltaTime;
 			to.x += transform.position.x;
 			to.y += transform.position.y;
 
 			rb.MovePosition (to);
 		}
 
-		if (Input.GetButtonDown ("Jump") &&
-			Physics2D.Raycast(transform.position, JumpCastEnd.position, 100f, LayerMask.NameToLayer("Platform"))) {
-
-			rb.velocity = Vector2.up * JumpForce * 10;
+		if (Input.GetButtonDown ("Jump")) {
+			if (Physics.Raycast (transform.position, Vector3.down, 1f, 1 << LayerMask.NameToLayer ("Platform")))
+				rb.velocity = Vector2.up * JumpForce * 10;
 		}
 
 		if (Input.GetKeyDown ("down") && platform)
 			ChangeLayer ();
+
+		if (Input.GetKeyDown (KeyCode.F) && !PlayerCamera.isRotating) {
+			PlayerCamera.StartRotate (90f, Wise.Clockwise, delegate(Transform t) {
+				Debug.Log("SD");
+			});
+		}
 	}
 
 	void ChangeLayer() {
@@ -64,6 +69,6 @@ public class Player : MonoBehaviour {
 		}
 
 		if (colider.gameObject.tag == "Platform")
-			platform = colider.gameObject.GetComponent<BoxCollider2D> ();
+			platform = colider.gameObject.GetComponent<BoxCollider> ();
 	}
 }
